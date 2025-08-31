@@ -25,4 +25,3 @@ typedef struct Instr {
 
 static Instr instr_nop();
 static void instr_print(Instr const *instr);
-

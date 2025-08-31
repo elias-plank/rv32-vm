@@ -62,7 +62,7 @@ static Instr instr_nop() {
 
 static void instr_print(Instr const *instr) {
     printf(
-        "Instr{ .op = %s, .rd = %02hhX, .rs1 = %02hhX, .rs2 = %02hhX, .imm = %08X }\n",
+        "Instr{ .op = %s, .rd = x%d, .rs1 = x%d, .rs2 = x%d, .imm = 0x%08X }\n",
         op_string(instr->op),
         instr->rd,
         instr->rs1,
