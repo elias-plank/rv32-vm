@@ -16,7 +16,7 @@
 //       - Memory
 //       - Writeback
 
-static void instr_pd(uint32_t instr) {
+static void instr_pd(uint32_t const instr) {
     Instr const decoded = instr_decode(instr);
     instr_print(&decoded);
 }
