@@ -1,7 +1,3 @@
-#pragma once
-
-#include "rv32_instr.h"
-
 enum : uint8_t {
     OPCODE_R_TYPE = 0b0110011,
     OPCODE_I_TYPE_ALU = 0b0010011,

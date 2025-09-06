@@ -1,5 +1,3 @@
-#include "rv32_instr.h"
-
 #define OP_STRINGIFY(op) case op: return # op
 
 static const char* op_string(Op const op) {

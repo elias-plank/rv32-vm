@@ -1,7 +1,3 @@
-#pragma once
-
-#include "rv32.h"
-
 typedef enum Op : uint8_t {
     ADD, SUB, XOR, OR, AND, SLL, SRL, SRA, SLT, SLTU,
     ADDI, XORI, ORI, ANDI, SLLI, SRLI, SRAI, SLTI, SLTIU,

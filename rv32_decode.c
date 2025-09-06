@@ -1,5 +1,3 @@
-#include "rv32_decode.h"
-
 static uint32_t instr_decode_sign_extend_imm(uint8_t const opcode, uint32_t imm) {
     switch (opcode) {
         case OPCODE_I_TYPE_ALU:
@@ -34,7 +32,6 @@ static Instr instr_decode_r_type(uint32_t const instr) {
                 case 0b0100000u: result.op = SUB; break;
                 default:
                     assert(0 && "Invalid funct7 for add/sub");
-                    break;
             }
             break;
         case 0b100u: result.op = XOR; break;
@@ -52,7 +49,6 @@ static Instr instr_decode_r_type(uint32_t const instr) {
         case 0b011u: result.op = SLTU; break;
         default:
             assert(0 && "Invalid funct3 for r-type instruction");
-            break;
     }
 
     return result;
