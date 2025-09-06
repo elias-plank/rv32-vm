@@ -1,6 +1,6 @@
 #include "rv32_decode.h"
 
-static uint32_t instr_decode_imm_extend(uint8_t const opcode, uint32_t imm) {
+static uint32_t instr_decode_sign_extend_imm(uint8_t const opcode, uint32_t imm) {
     switch (opcode) {
         case OPCODE_I_TYPE_ALU:
         case OPCODE_S_TYPE:
@@ -34,6 +34,7 @@ static Instr instr_decode_r_type(uint32_t const instr) {
                 case 0b0100000u: result.op = SUB; break;
                 default:
                     assert(0 && "Invalid funct7 for add/sub");
+                    break;
             }
             break;
         case 0b100u: result.op = XOR; break;
@@ -51,6 +52,7 @@ static Instr instr_decode_r_type(uint32_t const instr) {
         case 0b011u: result.op = SLTU; break;
         default:
             assert(0 && "Invalid funct3 for r-type instruction");
+            break;
     }
 
     return result;
@@ -68,7 +70,7 @@ static Instr instr_decode_i_type_alu(uint32_t const instr) {
     Instr result = { 0 };
     result.rd = rd;
     result.rs1 = rs1;
-    result.imm = instr_decode_imm_extend(OPCODE_I_TYPE_ALU, imm);
+    result.imm = instr_decode_sign_extend_imm(OPCODE_I_TYPE_ALU, imm);
 
     switch (funct3) {
         case 0b000u: result.op = ADDI; break;
@@ -101,7 +103,7 @@ static Instr instr_decode_i_type_mem(uint32_t const instr) {
     Instr result = { 0 };
     result.rd = rd;
     result.rs1 = rs1;
-    result.imm = instr_decode_imm_extend(OPCODE_I_TYPE_ALU, imm);
+    result.imm = instr_decode_sign_extend_imm(OPCODE_I_TYPE_ALU, imm);
     switch (funct3) {
         case 0b000u: result.op = LB; break;
         case 0b001u: result.op = LH; break;
@@ -123,7 +125,7 @@ static Instr instr_decode_s_type(uint32_t const instr) {
     Instr result = { 0 };
     result.rs1 = rs1;
     result.rs2 = rs2;
-    result.imm = instr_decode_imm_extend(OPCODE_S_TYPE, imm);
+    result.imm = instr_decode_sign_extend_imm(OPCODE_S_TYPE, imm);
 
     switch (funct3) {
         case 0b000u: result.op = SB; break;
@@ -152,7 +154,7 @@ static Instr instr_decode_b_type(uint32_t const instr) {
     Instr result = { 0 };
     result.rs1 = rs1;
     result.rs2 = rs2;
-    result.imm = instr_decode_imm_extend(OPCODE_B_TYPE, imm);
+    result.imm = instr_decode_sign_extend_imm(OPCODE_B_TYPE, imm);
 
     switch (funct3) {
         case 0b000u: result.op = BEQ; break;
@@ -180,7 +182,7 @@ static Instr instr_decode_jal(uint32_t const instr) {
 
     Instr result = { 0 };
     result.rd = rd;
-    result.imm = instr_decode_imm_extend(OPCODE_JAL, imm);
+    result.imm = instr_decode_sign_extend_imm(OPCODE_JAL, imm);
     result.op = JAL;
 
     return result;
@@ -194,7 +196,7 @@ static Instr instr_decode_jalr(uint32_t const instr) {
     Instr result = { 0 };
     result.rd = rd;
     result.rs1 = rs1;
-    result.imm = instr_decode_imm_extend(OPCODE_JALR, imm);
+    result.imm = instr_decode_sign_extend_imm(OPCODE_JALR, imm);
     result.op = JALR;
     
     return result;
@@ -202,11 +204,11 @@ static Instr instr_decode_jalr(uint32_t const instr) {
 
 static Instr instr_decode_u_type(uint32_t const instr) {
     uint8_t const rd = (instr >> 7) & 0x1Fu;
-    uint32_t const imm = ((instr >> 12) & 0xFFFFFu) << 12;
+    uint32_t const imm = ((instr >> 12) & 0xFFFFFu);
 
     Instr result = { 0 };
     result.rd = rd;
-    result.imm = imm;
+    result.imm = instr_decode_sign_extend_imm(OPCODE_AUIPC, imm);
 
     switch ((instr >> 6) & 1) {
         case 0u: result.op = AUIPC; break;

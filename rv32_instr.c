@@ -1,9 +1,8 @@
 #include "rv32_instr.h"
-#include "rv32_decode.h"
 
 #define OP_STRINGIFY(op) case op: return # op
 
-static const char* op_string(Op op) {
+static const char* op_string(Op const op) {
     switch (op) {
         OP_STRINGIFY(ADD);
         OP_STRINGIFY(SUB);
@@ -44,7 +43,6 @@ static const char* op_string(Op op) {
         OP_STRINGIFY(AUIPC);
         default:
             assert(0 && "Invalid op");
-            return "<invalid op>";
     }
 }
 
@@ -62,11 +60,11 @@ static Instr instr_nop() {
 
 static void instr_print(Instr const *instr) {
     printf(
-        "Instr{ .op = %s, .rd = x%d, .rs1 = x%d, .rs2 = x%d, .imm = 0x%08X }\n",
+        "Instr{ .op = %s, .rd = x%d, .rs1 = x%d, .rs2 = x%d, .imm = %i }\n",
         op_string(instr->op),
         instr->rd,
         instr->rs1,
         instr->rs2,
-        instr->imm
+        (int32_t) instr->imm
     );
 }
