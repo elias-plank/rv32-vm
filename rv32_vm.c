@@ -32,8 +32,7 @@ int main(void) {
     instr_pd(0xFFC60613);
     instr_pd(0x00C000EF);
     instr_pd(0x00A00513);
-    // ecall
-    // instr_pd(0x00000073);
+    instr_pd(0x00000073);
     instr_pd(0x000002B3);
     instr_pd(0x02B2D063);
     instr_pd(0x00050383);

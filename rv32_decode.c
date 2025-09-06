@@ -1,4 +1,4 @@
-static uint32_t instr_decode_sign_extend_imm(uint8_t const opcode, uint32_t imm) {
+static uint32_t instr_decode_sign_extend_imm(Opcode const opcode, uint32_t imm) {
     switch (opcode) {
         case OPCODE_I_TYPE_ALU:
         case OPCODE_S_TYPE:
@@ -39,7 +39,7 @@ static Instr instr_decode_r_type(uint32_t const instr) {
         case 0b111u: result.op = AND; break;
         case 0b001u: result.op = SLL; break;
         case 0b101u:
-            switch (funct7 & (1u << 5)) {
+            switch ((funct7 & (1u << 5)) >> 5) {
                 case 0u: result.op = SRL; break;
                 case 1u: result.op = SRA; break;
                 default: break;
@@ -73,13 +73,13 @@ static Instr instr_decode_i_type_alu(uint32_t const instr) {
         case 0b100u: result.op = XORI; break;
         case 0b110u: result.op = ORI; break;
         case 0b111u: result.op = ANDI; break;
-        case 0b001u: result.op = SLLI; break;
+        case 0b001u:
+            result.op = SLLI;
+            result.imm = imm & 0x1Fu;
+            break;
         case 0b101u:
-            switch (funct7 & (1u << 5)) {
-                case 0u: result.op = SRLI; break;
-                case 1u: result.op = SRAI; break;
-                default: break;
-            }
+            result.op = (funct7 & 0x20) ? SRAI: SRLI;
+            result.imm = imm & 0x1Fu;
             break;
         case 0b010u: result.op = SLTI; break;
         case 0b011u: result.op = SLTIU; break;
@@ -112,6 +112,7 @@ static Instr instr_decode_i_type_mem(uint32_t const instr) {
 
     return result;
 }
+
 static Instr instr_decode_s_type(uint32_t const instr) {
     uint16_t const imm = ((instr >> 7) & 0x1Fu) | ((instr >> 25) << 5);
     uint8_t const funct3 = (instr >> 12) & 0x7u;
@@ -215,8 +216,27 @@ static Instr instr_decode_u_type(uint32_t const instr) {
     return result;
 }
 
+static Instr instr_decode_privileged(uint32_t const instr) {
+    uint8_t const rd = (instr >> 7)  & 0x1Fu;
+    uint8_t const funct3 = (instr >> 12) & 0x7u;
+    uint8_t const rs1 = (instr >> 15) & 0x1Fu;
+    uint16_t const imm12 = (instr >> 20) & 0xFFFu;
+
+    Instr result = { 0 };
+    if (funct3 == 0 && rd == 0 && rs1 == 0) {
+        switch (imm12) {
+            case 0x000: result.op = ECALL; return result;
+            case 0x001: result.op = EBREAK; return result;
+            default: break;
+        }
+    }
+
+    assert(0 && "Unsupported SYSTEM instruction");
+    return instr_nop();
+}
+
 static Instr instr_decode(uint32_t const instr) {
-    uint8_t const opcode = instr & 0x7Fu;
+    Opcode const opcode = (Opcode) instr & 0x7Fu;
     switch (opcode) {
         case OPCODE_R_TYPE: return instr_decode_r_type(instr);
         case OPCODE_I_TYPE_ALU: return instr_decode_i_type_alu(instr);
@@ -227,6 +247,7 @@ static Instr instr_decode(uint32_t const instr) {
         case OPCODE_JALR: return instr_decode_jalr(instr);
         case OPCODE_LUI: return instr_decode_u_type(instr);
         case OPCODE_AUIPC: return instr_decode_u_type(instr);
+        case OPCODE_PRIVILEGED: return instr_decode_privileged(instr);
         default:
             assert(0 && "Unknown instruction");
     }

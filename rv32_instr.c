@@ -39,6 +39,8 @@ static const char* op_string(Op const op) {
         OP_STRINGIFY(JALR);
         OP_STRINGIFY(LUI);
         OP_STRINGIFY(AUIPC);
+        OP_STRINGIFY(ECALL);
+        OP_STRINGIFY(EBREAK);
         default:
             assert(0 && "Invalid op");
     }

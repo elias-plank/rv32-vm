@@ -1,4 +1,4 @@
-enum : uint8_t {
+typedef enum Opcode : uint8_t {
     OPCODE_R_TYPE = 0b0110011,
     OPCODE_I_TYPE_ALU = 0b0010011,
     OPCODE_I_TYPE_MEM = 0b0000011,
@@ -8,9 +8,10 @@ enum : uint8_t {
     OPCODE_JALR = 0b1100111,
     OPCODE_LUI = 0b0110111,
     OPCODE_AUIPC = 0b0010111,
-};
+    OPCODE_PRIVILEGED = 0b1110011,
+} Opcode;
 
-static uint32_t instr_decode_sign_extend_imm(uint8_t opcode, uint32_t imm);
+static uint32_t instr_decode_sign_extend_imm(Opcode opcode, uint32_t imm);
 static Instr instr_decode_r_type(uint32_t instr);
 static Instr instr_decode_i_type_alu(uint32_t instr);
 static Instr instr_decode_i_type_mem(uint32_t instr);
@@ -19,4 +20,5 @@ static Instr instr_decode_b_type(uint32_t instr);
 static Instr instr_decode_jal(uint32_t instr);
 static Instr instr_decode_jalr(uint32_t instr);
 static Instr instr_decode_u_type(uint32_t instr);
+static Instr instr_decode_privileged(uint32_t instr);
 static Instr instr_decode(uint32_t instr);
