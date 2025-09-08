@@ -14,3 +14,5 @@ static void instr_mem_destroy(InstrMem *mem);
 typedef struct DataMem {
     uint32_t base[0x8000];
 } DataMem;
+
+static uint8_t* data_mem_read(DataMem *mem, uint32_t addr);

@@ -46,7 +46,7 @@ static void instr_mem_load_text(InstrMem *mem, char* buffer, size_t size) {
         }
 
         if (len == cap) {
-            size_t new_cap = cap ? cap * 2 : 16;
+            size_t const new_cap = cap ? cap * 2 : 16;
             uint32_t *tmp = realloc(arr, new_cap * sizeof(uint32_t));
             if (!tmp) {
                 assert(0 && "Out of memory while reallocating");
@@ -64,14 +64,14 @@ static void instr_mem_load_text(InstrMem *mem, char* buffer, size_t size) {
     free(buffer);
 }
 
-static void instr_mem_load(InstrMem *mem, const char* file, InstrMemFileType type) {
+static void instr_mem_load(InstrMem *mem, const char* file, InstrMemFileType const type) {
     FILE *fp = fopen(file, instr_mem_load_read_type(type));
     if (!fp) {
         assert(0 && "Provided instruction memory file does not exist");
     }
 
     fseek(fp, 0, SEEK_END);
-    size_t size = ftell(fp);
+    size_t const size = ftell(fp);
     rewind(fp);
 
     char* buffer = malloc(size + (type == INSTR_MEM_FILE_TYPE_TEXT ? 1 : 0));
@@ -93,4 +93,10 @@ static void instr_mem_destroy(InstrMem *mem) {
     free(mem->base);
     mem->base = NULL;
     mem->size = 0;
+}
+
+static uint8_t* data_mem_read(DataMem *mem, uint32_t const addr) {
+    uint32_t const word_address = addr / 4;
+    uint32_t const byte_offset = addr % 4;
+    return (uint8_t *) (mem->base + word_address) + byte_offset;
 }
