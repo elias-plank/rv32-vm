@@ -39,4 +39,5 @@ typedef struct RegFile {
 } RegFile;
 
 static uint32_t reg_file_read(RegFile *file, Reg reg);
+static uint32_t *reg_file_read_ptr(RegFile *file, Reg reg);
 static void reg_file_write(RegFile *file, Reg reg, uint32_t value);

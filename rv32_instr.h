@@ -29,3 +29,4 @@ typedef struct Instr {
 
 static Instr instr_nop();
 static void instr_print(Instr const *instr);
+static void instr_sprintf(char* buffer, size_t size, Instr const *instr);
