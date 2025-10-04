@@ -33,6 +33,7 @@ typedef struct Vm {
     DataMem data_mem;
 
     uint32_t pc;
+    bool pc_update;
 } Vm;
 
 static void vm_load(Vm *vm, const char* file, InstrMemFileType const type) {
@@ -69,6 +70,7 @@ static void vm_execute_ecall(Vm *vm) {
 }
 
 static void vm_execute(Vm *vm, Instr const *instr) {
+    vm->pc_update = false;
     uint32_t const rd1 = reg_file_read(&vm->reg_file, instr->rs1);
     uint32_t const rd2 = reg_file_read(&vm->reg_file, instr->rs2);
     uint32_t *rd = reg_file_read_ptr(&vm->reg_file, instr->rd);
@@ -102,6 +104,54 @@ static void vm_execute(Vm *vm, Instr const *instr) {
         case LW: *rd = *(int32_t *) data_mem_read(&vm->data_mem, instr->rd + (int32_t) instr->imm); break;
         case LBU: *rd = *(uint8_t *)  data_mem_read(&vm->data_mem, instr->rd + (int32_t) instr->imm); break;
         case LHU: *rd = *(uint16_t *) data_mem_read(&vm->data_mem, instr->rd + (int32_t) instr->imm); break;
+        case SB: data_mem_write8(&vm->data_mem, instr->rs1 + instr->imm, instr->rs2); break;
+        case SH: data_mem_write16(&vm->data_mem, instr->rs1 + instr->imm, instr->rs2); break;
+        case SW: data_mem_write32(&vm->data_mem, instr->rs1 + instr->imm, instr->rs2); break;
+        case BEQ: {
+            vm->pc_update = !(instr->rs1 - instr->rs2);
+            vm->pc += vm->pc_update * instr->imm;
+            break;
+        }
+        case BNE: {
+            vm->pc_update = (instr->rs1 - instr->rs2);
+            vm->pc += vm->pc_update * instr->imm;
+            break;
+        }
+        case BLT: {
+            // TODO(elias): may be optimized
+            vm->pc_update = (int32_t) instr->rs1 < (int32_t) instr->rs2;
+            vm->pc += vm->pc_update * instr->imm;
+            break;
+        }
+        case BGE: {
+            vm->pc_update = (int32_t) instr->rs1 >= (int32_t) instr->rs2;
+            vm->pc += vm->pc_update * instr->imm;
+            break;
+        }
+        case BLTU: {
+            vm->pc_update = instr->rs1 < instr->rs2;
+            vm->pc += vm->pc_update * instr->imm;
+            break;
+        }
+        case BGEU: {
+            vm->pc_update = instr->rs1 >= instr->rs2;
+            vm->pc += vm->pc_update * instr->imm;
+            break;
+        }
+        case JAL: {
+            *rd = vm->pc + 4;
+            vm->pc_update = true;
+            vm->pc += instr->imm;
+            break;
+        }
+        case JALR: {
+            *rd = vm->pc + 4;
+            vm->pc_update = true;
+            vm->pc = instr->rs1 + instr->imm;
+            break;
+        }
+        case LUI: *rd = instr->imm << 12; break;
+        case AUIPC: *rd = vm->pc + (instr->imm << 12); break;
         case ECALL: vm_execute_ecall(vm); break;
         default: break;
     }

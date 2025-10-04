@@ -16,3 +16,6 @@ typedef struct DataMem {
 } DataMem;
 
 static uint8_t* data_mem_read(DataMem *mem, uint32_t addr);
+static void data_mem_write8(DataMem *mem, uint32_t addr, uint8_t value);
+static void data_mem_write16(DataMem *mem, uint32_t addr, uint16_t value);
+static void data_mem_write32(DataMem *mem, uint32_t addr, uint32_t value);

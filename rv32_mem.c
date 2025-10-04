@@ -100,3 +100,21 @@ static uint8_t* data_mem_read(DataMem *mem, uint32_t const addr) {
     uint32_t const byte_offset = addr % 4;
     return (uint8_t *) (mem->base + word_address) + byte_offset;
 }
+
+static void data_mem_write8(DataMem *mem, uint32_t addr, uint8_t value) {
+    uint32_t const word_address = addr / 4;
+    uint32_t const byte_offset = addr % 4;
+    *((uint8_t *) (mem->base + word_address) + byte_offset) = value;
+}
+
+static void data_mem_write16(DataMem *mem, uint32_t addr, uint16_t value) {
+    uint32_t const word_address = addr / 4;
+    uint32_t const byte_offset = addr % 4;
+    *((uint16_t *) (mem->base + word_address) + byte_offset) = value;
+}
+static void data_mem_write32(DataMem *mem, uint32_t addr, uint32_t value) {
+    uint32_t const word_address = addr / 4;
+    uint32_t const byte_offset = addr % 4;
+    *((uint32_t *) (mem->base + word_address) + byte_offset) = value;
+
+}
