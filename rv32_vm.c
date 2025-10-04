@@ -45,11 +45,11 @@ static void vm_destroy(Vm *vm) {
 }
 
 static uint32_t vm_fetch(Vm const *vm) {
-    return vm->instr_mem.base[vm->pc];
+    return vm->instr_mem.base[vm->pc / 4];
 }
 
 static uint32_t vm_fetch_offset(Vm const *vm, uint32_t const offset) {
-    return vm->instr_mem.base[vm->pc + offset];
+    return vm->instr_mem.base[vm->pc / 4 + offset];
 }
 
 static uint32_t vm_fetch_offset_absolute(Vm const *vm, uint32_t const offset) {
@@ -162,11 +162,11 @@ static void vm_run(Vm *vm) {
     InitWindow(1280, 720, "rv32_vm");
     SetTargetFPS(60);
 
-    while (vm->pc < vm->instr_mem.size && !WindowShouldClose()) {
+    while ((vm->pc / 4) < vm->instr_mem.size && !WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        uint32_t const start = vm->pc / PAGE_SIZE * PAGE_SIZE;
+        uint32_t const start = (vm->pc / 4) / PAGE_SIZE * PAGE_SIZE;
         uint32_t const end = u32_min(vm->instr_mem.size, start + PAGE_SIZE);
         uint32_t const count = end - start;
         bool const want_step = IsKeyPressed(KEY_F10);
@@ -178,7 +178,9 @@ static void vm_run(Vm *vm) {
 
             if (current == vm->pc && want_step) {
                 vm_execute(vm, &decoded);
-                ++vm->pc;
+                if (!vm->pc_update) {
+                    vm->pc += 4;
+                }
                 break;
             }
 
@@ -186,7 +188,7 @@ static void vm_run(Vm *vm) {
             instr_sprintf(instr_text_buffer, sizeof instr_text_buffer, &decoded);
 
             int const text_y_position = (int) (10.0f + (float) i * 1.25f * FONT_SIZE);
-            Color const text_color = i != vm->pc ? WHITE : (Color) { 255, 153, 0, 255 };
+            Color const text_color = i != (vm->pc / 4) ? WHITE : (Color) { 255, 153, 0, 255 };
             DrawText(instr_text_buffer, 10, text_y_position, FONT_SIZE, text_color);
         }
 
